@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/gh/mattdiamond/Recorderjs@master/dist/recorder.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Biometric Security System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --dark-bg: #1a1c20;
+        --primary-blue: #00aaff;
+        --container-bg: #2a2d35;
+        --text-color: #e0e0e0;
+        --success-color: #28a745;
+        --error-color: #dc3545;
+        --success-bg: rgba(40, 167, 69, 0.15);
+        --error-bg: rgba(220, 53, 69, 0.15);
+      }
+      body {
+        font-family: "Roboto Mono", monospace;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background-color: var(--dark-bg);
+        color: var(--text-color);
+        margin: 0;
+        padding: 2rem;
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+      .container {
+        background: var(--container-bg);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid #444;
+        box-shadow: 0 0 20px rgba(0, 170, 255, 0.15);
+        text-align: center;
+        width: 450px;
+        transition: all 0.3s ease;
+      }
+      h1,
+      h2 {
+        color: #fff;
+      }
+      h1 {
+        margin-bottom: 2rem;
+        width: 100%;
+        font-weight: 500;
+        text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+      }
+      h2 {
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 0.5rem;
+        margin-top: 0;
+        font-weight: 400;
+      }
+      .video-container {
+        margin: 1.5rem auto;
+        border: 2px solid var(--primary-blue);
+        border-radius: 8px;
+        overflow: hidden;
+        max-width: 400px;
+        background-color: #000;
+        box-shadow: 0 0 10px rgba(0, 170, 255, 0.4);
+      }
+      .video-container img {
+        width: 100%;
+        display: block;
+      }
+      .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+      button {
+        background-color: transparent;
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      button:hover {
+        background-color: var(--primary-blue);
+        color: #fff;
+        box-shadow: 0 0 15px var(--primary-blue);
+      }
+      button:disabled {
+        border-color: #555;
+        color: #555;
+        background-color: transparent;
+        cursor: not-allowed;
+      }
+      #stop-camera {
+        color: var(--error-color);
+        border-color: var(--error-color);
+      }
+      #stop-camera:hover {
+        background-color: var(--error-color);
+        color: #fff;
+        box-shadow: 0 0 15px var(--error-color);
+      }
+      .status {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-color);
+        font-weight: 500;
+        min-height: 24px;
+        line-height: 1.5;
+        transition: all 0.3s ease;
+        border: 1px solid #555;
+      }
+      .status.success {
+        background-color: var(--success-bg);
+        color: var(--success-color);
+        border-color: var(--success-color);
+        text-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+      }
+      .status.error {
+        background-color: var(--error-bg);
+        color: var(--error-color);
+        border-color: var(--error-color);
+        text-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+      }
+      .status.processing {
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🛡️ Biometric Security System 🛡️</h1>
+
+    <div class="container">
+      <h2>Face Biometrics</h2>
+      <div class="video-container">
+        <img
+          id="video-feed"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+          alt="Video Feed"
+        />
+      </div>
+      <div class="button-group">
+        <button id="start-register-face">Start Registration</button>
+        <button id="start-verify-face">Start Verification</button>
+        <button id="stop-camera" style="display: none">Stop Camera</button>
+      </div>
+      <div
+        class="button-group"
+        id="capture-button-container"
+        style="display: none"
+      >
+        <button id="capture-face">Capture & Save Face</button>
+      </div>
+      <div id="face-status" class="status">Idle</div>
+    </div>
+
+    <div class="container">
+      <h2>Voice Biometrics</h2>
+      <p>Click to record a 4-second sample.</p>
+      <div class="button-group">
+        <button id="register-voice">Register Voice</button>
+        <button id="verify-voice">Verify Voice</button>
+      </div>
+      <div id="voice-status" class="status">Idle</div>
+    </div>
+
+    <script>
+      // --- DOM Elements ---
+      const videoFeed = document.getElementById("video-feed");
+      const startRegisterFaceBtn = document.getElementById(
+        "start-register-face"
+      );
+      const startVerifyFaceBtn = document.getElementById("start-verify-face");
+      const stopCameraBtn = document.getElementById("stop-camera");
+      const captureFaceBtn = document.getElementById("capture-face");
+      const captureContainer = document.getElementById(
+        "capture-button-container"
+      );
+      const faceStatus = document.getElementById("face-status");
+
+      const registerVoiceBtn = document.getElementById("register-voice");
+      const verifyVoiceBtn = document.getElementById("verify-voice");
+      const voiceStatus = document.getElementById("voice-status");
+
+      const blankImgSrc =
+        "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+      // --- Face Logic ---
+      async function stopAllFaceActivity() {
+        await fetch("/stop_video", { method: "POST" });
+        videoFeed.src = blankImgSrc;
+        faceStatus.textContent = "Camera stopped.";
+        faceStatus.className = "status";
+        captureContainer.style.display = "none";
+        stopCameraBtn.style.display = "none";
+      }
+
+      startRegisterFaceBtn.addEventListener("click", () => {
+        videoFeed.src = "/video_feed/register";
+        faceStatus.textContent = "Position your face and click capture.";
+        faceStatus.className = "status";
+        captureContainer.style.display = "flex";
+        stopCameraBtn.style.display = "inline-block";
+      });
+
+      startVerifyFaceBtn.addEventListener("click", () => {
+        videoFeed.src = "/video_feed/verify";
+        faceStatus.textContent = "Verifying face in real-time...";
+        faceStatus.className = "status";
+        captureContainer.style.display = "none";
+        stopCameraBtn.style.display = "inline-block";
+      });
+
+      stopCameraBtn.addEventListener("click", stopAllFaceActivity);
+
+      captureFaceBtn.addEventListener("click", async () => {
+        faceStatus.textContent = "Capturing...";
+        const response = await fetch("/register_face", { method: "POST" });
+        const result = await response.json();
+
+        if (result.success) {
+          faceStatus.className = "status success";
+          faceStatus.textContent = result.message;
+          captureContainer.style.display = "none";
+        } else {
+          faceStatus.className = "status error";
+          faceStatus.textContent = result.message;
+        }
+      });
+
+      // --- Voice Logic ---
+      let recorder,
+        audioStream,
+        isRecording = false;
+      async function startVoiceRecording(endpoint, button) {
+        if (isRecording) return;
+        isRecording = true;
+        button.disabled = true;
+        voiceStatus.textContent = "Requesting microphone access...";
+        try {
+          audioStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const input = audioContext.createMediaStreamSource(audioStream);
+          recorder = new Recorder(input, { numChannels: 1 });
+          recorder.record();
+          voiceStatus.textContent = "Recording for 4 seconds... Speak now!";
+          setTimeout(() => stopVoiceRecording(endpoint, button), 4000);
+        } catch (error) {
+          voiceStatus.className = "status error";
+          voiceStatus.textContent = "Could not access microphone.";
+          isRecording = false;
+          button.disabled = false;
+        }
+      }
+
+      function stopVoiceRecording(endpoint, button) {
+        recorder.stop();
+        audioStream.getTracks().forEach((track) => track.stop());
+        voiceStatus.textContent = "Processing...";
+        voiceStatus.className = "status processing";
+        recorder.exportWAV((blob) => {
+          const formData = new FormData();
+          formData.append("audio_data", blob, "recorded.wav");
+          fetch(endpoint, { method: "POST", body: formData })
+            .then((res) => res.json())
+            .then((result) => {
+              voiceStatus.classList.remove("processing");
+              updateVoiceStatus(result);
+              isRecording = false;
+              button.disabled = false;
+            });
+        });
+      }
+
+      const updateVoiceStatus = (result) => {
+        if (result.success) {
+          voiceStatus.className = "status success";
+          voiceStatus.textContent =
+            result.message ||
+            `Verification Success! (Distance: ${result.distance})`;
+        } else {
+          voiceStatus.className = "status error";
+          voiceStatus.textContent =
+            result.message || "Operation failed. See server logs for details.";
+        }
+      };
+      registerVoiceBtn.addEventListener("click", () =>
+        startVoiceRecording("/register_voice", registerVoiceBtn)
+      );
+      verifyVoiceBtn.addEventListener("click", () =>
+        startVoiceRecording("/verify_voice", verifyVoiceBtn)
+      );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+.venv/
+.env
+
+# Instance folder (for database and secrets)
+instance/
+database.db
+
+# Data folders (user-specific biometric data should not be public)
+/data/keys/
+/data/face_encodings/
+/data/voice_samples/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
